@@ -6,3 +6,6 @@ package-lock.json
 
 # Settings with set password
 settings.json
+
+# .idea
+.idea/
