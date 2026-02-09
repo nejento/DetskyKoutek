@@ -1,0 +1,206 @@
+<%- include ("templates/header") %>
+
+<%
+const hoursToText = (time) => {
+    if (time === 1) {
+        return time + " hodina";
+    } else if (time > 1 && time < 5 || time < 1 && time !== 0) {
+        return time + " hodiny";
+    } else return time + " hodin";
+},
+monthNames = ["leden", "únor", "březen", "duben", "květen", "červen", "červenec", "srpen", "září", "říjen", "listopad", "prosinec"];
+%>
+
+<main role="main">
+    <div class="jumbotron small-jumbotron">
+        <div class="container">
+            <h1 class="display-4 pb-4">Přehled</h1>
+            <div class="row">
+                <!-- Seznam rezervací -->
+                <div class="container">
+                    <h3 class="mb-3">Seznam vytvořených rezervací</h3>
+
+                    <div id="no-success-remove" class="alert alert-danger" role="alert" style="display: none">
+                        Nepovedlo se odstranit rezervaci. Zkuste to prosím znovu.
+                    </div>
+                    <div id="no-valid-remove" class="alert alert-warning" role="alert" style="display: none">
+                        Zadaná data nejsou platná. Zadejte data v požadovaných formátech a zkuste to znovu.
+                    </div>
+                    <%
+                    if (typeof(rezervace) != 'undefined' && rezervace.length > 0) { //Rezervace existují
+                        %>
+                        <div class="list-group">
+                            <%
+
+                                // Vypsat jednotlivé rezervace
+                            for (let i = 0; i < rezervace.length; i++) {
+                                let dite = deti[deti.findIndex(d => d.id === rezervace[i].child_id)];
+                                    dateDifference = new Date(new Date() - dite.birthdate),
+                                    diteVek = Math.abs(dateDifference.getUTCFullYear() - 1970),
+                                    rezervaceStart = new Date(rezervace[i].time_from),
+                                    rezervaceEnd = new Date(rezervace[i].time_to),
+                                    options = { weekday: 'long', month: 'long', day: 'numeric' },
+                                    rezervaceDate = rezervaceStart.toLocaleDateString('cs-CZ', options),
+                                    rezervaceStartTime = rezervaceStart.getHours() + ":" + rezervaceStart.getMinutes() + (rezervaceStart.getMinutes() === 0 ? "0" : ""),
+                                    rezervaceEndTime = rezervaceEnd.getHours() + ":" + rezervaceEnd.getMinutes() + (rezervaceEnd.getMinutes() === 0 ? "0" : ""),
+                                    rezervaceAsistent = rezervace[i].user_id;
+
+                                if (rezervaceAsistent == null) { //Pokud k rezervaci není přidělen asistent, zobrazit rezervaci jako nepotvrzenou
+
+                                %>
+                                <div id="reservation_<%= rezervace[i].id %>" class="list-group-item list-group-item-action bg-light">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1"><%= dite.name %> <%= dite.surname %> <span class="text-muted">(<%= diteVek %>)</span></h5>
+                                        <small>Rezervace zatím nebyla potvrzena</small>
+                                    </div>
+                                    <p class="mb-1"><%= rezervaceDate %>, <%= rezervaceStartTime %>&mdash;<%= rezervaceEndTime %></p>
+
+                                    <%
+                                    if (rezervace[i].removable) { //Pokud je rezervace odstranitelná, zobrazit odstraňovací tlačítko (rezervace je až další den nebo není zatím potvrzená)
+                                        %>
+                                        <button name="cardRemove" class="btn btn-outline-danger removeReservation" data-resid="<%= rezervace[i].id %>">Zrušit rezervaci</button>
+                                        <%
+                                    }
+                                    %>
+                                </div>
+                                <%
+
+                                } else { //Pokud je k rezervaci přidělen asistent, zobrazit jako potvrzenou
+                                    %>
+                                    <div id="reservation_<%= rezervace[i].id %>" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h5 class="mb-1"><%= dite.name %> <%= dite.surname %> <span class="text-muted">(<%= diteVek %>)</span></h5>
+                                            <small>Rezervace byla potvrzena</small>
+                                        </div>
+                                        <p class="mb-1"><%= rezervaceDate %>, <%= rezervaceStartTime %>&mdash;<%= rezervaceEndTime %></p>
+                                        <p><span class="text-muted">Asistent: </span><%= rezervace[i].name %> <%= rezervace[i].surname %></p>
+
+                                        <%
+                                        if (rezervace[i].removable) { //Pokud je rezervace odstranitelná, zobrazit odstraňovací tlačítko (rezervace je až další den nebo není zatím potvrzená)
+                                            %>
+                                            <button name="cardRemove" class="btn btn-outline-danger removeReservation" data-resid="<%= rezervace[i].id %>">Zrušit rezervaci</button>
+                                            <%
+                                        }
+                                        %>
+                                    </div>
+                                    <%
+                                }
+                            }
+                            %>
+                        </div>
+                        <%
+                    } else { //Žádné rezervace nejsou vytvořeny
+                        %>
+                        <div class="alert alert-secondary" role="alert">
+                            Nejsou naplánované žádné rezervace. Seznam proběhlých rezervací za minulé měsíce můžete najít na stránce Přehled.
+                        </div>
+                        <%
+                    }
+                    %>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2 class="pb-3 border-bottom">Provedená hlídání</h2>
+        <form class="form-row">
+            <div class="form-group col-md-2">
+                <select id="yearSelector" name="year" class="form-control">
+                    <%
+                    if (typeof years != 'undefined' && years.length > 0) {
+                        for (let i = 0; i < years.length; i++) {
+                            let selected = (typeof year != 'undefined' && year === String(years[i]) ? "selected" : "");
+                            %>
+                            <option value="<%= years[i] %>" <%= selected %>><%= years[i] %></option>
+                            <%
+                        }
+                    }
+                    %>
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <select id="monthSelector" name="month" class="form-control">
+                    <%
+                    if (typeof months != 'undefined' && months.length > 0) {
+                        for (let i = 0; i < months.length; i++) {
+                            let selected = (typeof month != 'undefined' && month === String(months[i]) ? "selected" : "");
+                            %>
+                            <option value="<%= months[i] %>" <%= selected %>><%= monthNames[months[i] - 1] %></option>
+                            <%
+                        }
+                    }
+                    %>
+                </select>
+            </div>
+            <div class="form-group col-md-3 d-flex align-items-end">
+                <button id="getTables" class="btn btn-primary bg-fptul mr-1" type="submit">Vypsat</button>
+            </div>
+        </form>
+        <%
+        if (typeof table != 'undefined') {
+            const odhlidanoCelkem = Math.round((table.timeSum / 60) * 10) / 10;
+            %>
+            <div class="table-responsive">
+                <table class="table-sm table table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Dítě</th>
+                            <th scope="col">Datum</th>
+                            <th scope="col">Od</th>
+                            <th scope="col">Do</th>
+                            <th scope="col">Doba hlídání</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <%
+                    for (let j = 0; j < table.reservations.length; j++) {
+                        const reservation = table.reservations[j];
+                        let rezervaceStart = new Date(reservation.timeFrom),
+                            rezervaceEnd = new Date(reservation.timeTo),
+                            options = { month: 'numeric', day: 'numeric', year: 'numeric'},
+                            rezervaceDate = rezervaceStart.toLocaleDateString('cs-CZ', options),
+                            rezervaceStartTime = rezervaceStart.getHours() + ":" + rezervaceStart.getMinutes() + (rezervaceStart.getMinutes() === 0 ? "0" : ""),
+                            rezervaceEndTime = rezervaceEnd.getHours() + ":" + rezervaceEnd.getMinutes() + (rezervaceEnd.getMinutes() === 0 ? "0" : ""),
+                            odhlidano = Math.round((rezervaceEnd - rezervaceStart) / (1000 * 60 * 60) * 10) / 10;
+                    %>
+                    <tr>
+                        <td><%= reservation.childrenName %></td>
+                        <td><%= rezervaceDate %></td>
+                        <td><%= rezervaceStartTime %></td>
+                        <td><%= rezervaceEndTime %></td>
+                        <td><%= hoursToText(odhlidano) %></td>
+                    </tr>
+                    <%
+                    }
+                    %>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="1"><strong>Celková cena</strong>:</td>
+                        <td colspan="2"><%= table.startedHours * price %> Kč</td>
+                        <td colspan="1"><strong>Celková doba:</strong></td>
+                        <td><%= hoursToText(odhlidanoCelkem) %></td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <%
+        }
+        %>
+    </div>
+
+    <!-- Confirm modal -->
+    <%- include ("templates/forms/confirmmodal", {modalTitle: "Zrušit rezervaci", modalDismiss: "Nerušit", modalConfirm: "Ano, zrušit"}) %>
+
+    <!-- Toasty -->
+    <%- include ("templates/toasttemplate") %>
+
+</main>
+
+<script src="/scripts/overview.js"></script>
+
+<hr/>
+
+<%- include ("templates/footer") %>

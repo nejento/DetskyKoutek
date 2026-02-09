@@ -1,0 +1,57 @@
+{
+    "name": "Rezervační systém dětského koutku Technické univerzity v Liberci",
+    "short_name": "D\u011btsk\u00fd koutek TUL",
+    "description": "Rezervační systém pro krátkodobou péči o děti zaměstnaných a studujících rodičů Technické univerzity v Liberci",
+    "icons": [
+        {
+            "src": "/images/favicons/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/images/favicons/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "start_url": "/",
+    "shortcuts": [
+        {
+            "name": "Vytvořit rezervaci hlídání",
+            "short_name": "Zarezervovat",
+            "description": "Zobrazit formulář pri vytvoření rezervace hlídání dětí v Dětském koutku TUL",
+            "url": "/user/reservations",
+            "icons": [
+                {
+                    "src": "/images/favicons/android-chrome-192x192.png",
+                    "sizes": "192x192"
+                },
+                {
+                    "src": "/images/favicons/android-chrome-512x512.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Přehled rezervací",
+            "short_name": "Přehled",
+            "description": "Zobrazit přehled provedených hlídání",
+            "url": "/user",
+            "icons": [
+                {
+                    "src": "/images/favicons/android-chrome-192x192.png",
+                    "sizes": "192x192"
+                },
+                {
+                    "src": "/images/favicons/android-chrome-512x512.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    ],
+    "theme_color": "#183c6b",
+    "background_color": "#183c6b",
+    "display": "standalone"
+}

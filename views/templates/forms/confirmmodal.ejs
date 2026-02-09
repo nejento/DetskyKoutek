@@ -1,0 +1,19 @@
+<div class="modal fade" id="confirmModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header text-light bg-danger ">
+                <h5 class="modal-title" id="modalTitle"><%= modalTitle %></h5>
+                <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="confirmBody" class="modal-body">
+                body
+            </div>
+            <div class="modal-footer">
+                <button id="cancelModal" type="button" class="btn btn-secondary" data-dismiss="modal"><%= modalDismiss %></button>
+                <button id="confirmRemove" type="button" class="btn btn-danger" data-dismiss="modal"><%= modalConfirm %></button>
+            </div>
+        </div>
+    </div>
+</div>

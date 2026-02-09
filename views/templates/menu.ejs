@@ -1,0 +1,77 @@
+<%
+// Pokud nedostane EJS kompilátor proměnnou activeNavbar, neshodí celou stránku, ale v navbaru nezobrazí aktivní stránku
+if (typeof activeNavbar == 'undefined') {
+    activeNavbar = "";
+}
+%>
+
+<body>
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-fptul">
+    <div class="container">
+        <a class="navbar-brand" href="/">Dětský koutek TUL</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+             <ul class="navbar-nav">
+                <li class="nav-item <% if (activeNavbar.toLowerCase() === "domu") { %> active <% } %>">
+                    <a class="nav-link" href="/">Domů</a>
+                </li>
+                <%
+                if (typeof role != 'undefined') {
+                    if (role === 'parent' || role === 'assistant' || role === 'admin') {
+                    %>
+                        <li class="nav-item <% if (activeNavbar.toLowerCase() === "prehled") { %> active <% } %>">
+                            <a class="nav-link" href="/user">Přehled</a>
+                        </li>
+                        <li class="nav-item <% if (activeNavbar.toLowerCase() === "deti") { %> active <% } %>">
+                            <a class="nav-link" href="/user/children">Správa dětí</a>
+                        </li>
+                        <li class="nav-item <% if (activeNavbar.toLowerCase() === "rezervace") { %> active <% } %>">
+                            <a class="nav-link" href="/user/reservations">Rezervace</a>
+                        </li>
+                    <%
+                    }
+
+                    if (role === 'assistant' || role === 'admin') {
+                    %>
+                        <li class="nav-item <% if (activeNavbar.toLowerCase() === "staff") { %> active <% } %>">
+                            <a class="nav-link" href="/staff">Rozvrh</a>
+                        </li>
+                    <%
+                    }
+
+                    if (role === 'admin') {
+                    %>
+                        <li class="nav-item <% if (activeNavbar.toLowerCase() === "spravarezervaci") { %> active <% } %>">
+                            <a class="nav-link" href="/admin/manage">Správa rezervací</a>
+                        </li>
+                        <li class="nav-item <% if (activeNavbar.toLowerCase() === "admin") { %> active <% } %>">
+                            <a class="nav-link" href="/admin">Administrace</a>
+                        </li>
+                    <%
+                    }
+                }
+                %>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+            <%
+            if (typeof role != 'undefined' && role !== "") {
+                %>
+                <li class="nav-item">
+                    <a class="nav-link" href="/auth/logout"><%= (typeof name != 'undefined' && typeof surname != 'undefined' ? name + " " + surname : "Odhlásit") %> <i class="fas fa-sign-out-alt"></i></a>
+                </li>
+                <%
+            } else {
+                %>
+                <li class="nav-item">
+                    <a class="nav-link" href="/auth/login"><i class="fas fa-sign-in-alt"></i> Přihlásit se</a>
+                </li>
+                <%
+            }
+            %>
+            </ul>
+        </div>
+    </div>
+</nav>

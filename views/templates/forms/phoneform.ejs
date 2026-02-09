@@ -1,0 +1,27 @@
+<%
+if (typeof(phone) == 'undefined') { //Pokud není předloženo existující telefonní čístlo, nepředvyplňujeme položky formu
+    contact = "";
+} else {
+    contact = phone;
+}
+%>
+
+<div id="no-success-phone" class="alert alert-danger" role="alert" style="display: none">
+    Nepovedlo se přidat čas do kalendáře. Zkuste to prosím znovu.
+</div>
+<div id="no-valid-phone" class="alert alert-warning" role="alert" style="display: none">
+    Zadaná data nejsou platná. Zadejte data v požadovaných formátech a zkuste to znovu.
+</div>
+
+<div class="mb-3">
+    <label for="phone" class="col-form-label">Telefon rodiče <span class="text-muted">(abychom Vás mohli v případě nutnosti kontaktovat, potřebujeme Vaše telefonní číslo)</span></label>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">+420</span>
+        </div>
+        <input type="text" name="phone" class="form-control" placeholder="Telefonní číslo" value="<%= contact %>">
+        <div class="invalid-feedback">
+            Prosím zadejte platné telefonní číslo
+        </div>
+    </div>
+</div>

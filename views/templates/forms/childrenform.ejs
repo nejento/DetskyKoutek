@@ -1,0 +1,60 @@
+<%
+    if (typeof dite == 'undefined') { //Pokud není předložen seznam dětí, nepředvyplňujeme položky formu
+        diteJmeno = "";
+        ditePrijmeni = "";
+        diteDatumNarozeni = "";
+        diteVek = "";
+        ditePoznamka = "";
+        diteEditovatelne = true;
+    } else {
+        let dateDifference = new Date(new Date() - dite.birthdate);
+        diteJmeno = dite.name;
+        ditePrijmeni = dite.surname;
+        diteDatumNarozeni = ('0' + (dite.birthdate.getUTCDay() + 1)).slice(-2) + ". " + ('0' + (dite.birthdate.getUTCMonth() + 1)).slice(-2) + ". " + dite.birthdate.getUTCFullYear();
+        diteVek = Math.abs(dateDifference.getUTCFullYear() - 1970);
+        ditePoznamka = dite.parent_note;
+        diteEditovatelne = (dite.editable === 1);
+    }
+%>
+
+<div id="no-success" class="alert alert-danger" role="alert" style="display: none">
+    Nepovedlo se přidat čas do kalendáře. Zkuste to prosím znovu.
+</div>
+<div id="no-valid" class="alert alert-warning" role="alert" style="display: none">
+    Zadaná data nejsou platná. Zadejte data v požadovaných formátech a zkuste to znovu.
+</div>
+
+<div class="mb-3">
+    <label for="jmeno" class="col-form-label">Základní údaje o dítěti</label>
+    <div class="input-group">
+        <input type="text" aria-label="jmeno" name="jmeno" placeholder="Jméno" class="form-control" value="<%= diteJmeno %>" <% if (diteEditovatelne) { %> required <% } else { %> disabled <% } %> />
+        <input type="text" aria-label="prijmeni" name="prijmeni" placeholder="Příjmení" class="form-control" value="<%= ditePrijmeni %>" <% if (diteEditovatelne) { %> required <% } else { %> disabled <% } %> />
+        <div class="invalid-feedback">
+            Jméno a příjmení dítěte je vyžadováno
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <label for="jmeno" class="col-form-label">Datum narození dítěte</label>
+        <div class="input-group date mb-3">
+            <input type="text" name="vek" class="form-control date" aria-label="Datum narození dítěte" value="<%= diteDatumNarozeni %>" <% if (diteEditovatelne) { %> required <% } else { %> disabled <% } %>>
+            <div class="input-group-append">
+                <span class="input-group-text"><i class="far fa-calendar"></i></span>
+            </div>
+        </div>
+        <div class="invalid-feedback">
+            Datum narození dítěte je vyžadováno
+        </div>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label for="poznamka" class="col-form-label">Poznámka o dítěti <span class="text-muted">(volitelné)</span></label>
+    <div class="input-group">
+        <textarea class="form-control" name="poznamka" aria-label="With textarea" placeholder="Máte pro nás nějakou poznámku o které bychom měli vědět?"><%= ditePoznamka %></textarea>
+    </div>
+</div>
+
+<script src="/scripts/childrenform.js"></script>

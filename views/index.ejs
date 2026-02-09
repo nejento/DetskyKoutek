@@ -1,0 +1,71 @@
+<%- include ("templates/header") %>
+
+<main role="main">
+
+  <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron jumbotron-background" style="background-image: url('/images/bg<%= Math.floor(Math.random() * (3 - 1 + 1)) + 1 %>.jpg');">
+
+        <div class="container">
+            <h1 class="display-3">Dětský koutek</h1>
+
+            <p>Rezervační systém pro krátkodobou péči o děti zaměstnaných a studujících rodičů</p>
+            <p><a class="btn btn-primary btn-lg bg-fptul" href="/user/reservations" role="button">Zarezervovat místo &raquo;</a></p>
+
+            <%
+            if (typeof alertEnable != 'undefined' && alertEnable) {
+                %>
+                <div class="alert alert-<%= (alertColor !== "" ? alertColor : "secondary") %>" role="alert">
+                    <%
+                    if (typeof alertHeader != 'undefined') {
+                        %>
+                        <h4 class="alert-heading"><strong><%= alertHeader %></strong></h4>
+                        <%
+                    }
+
+                    if (typeof alertText != 'undefined') {
+                        %>
+                        <%- alertText %>
+                        <%
+                    }
+                    %>
+                </div>
+                <%
+            }
+            %>
+        </div>
+    </div>
+
+    <div class="container">
+        <%
+        if (typeof currentInfo != 'undefined') {
+            %>
+            <div class="row pb-4">
+                <div class="col">
+                    <h2>Aktuální informace</h2>
+                    <%- currentInfo %>
+                    <a class="btn btn-secondary" href="<%= settings.appUrl %>" role="button" target="_blank">Více novinek na webu &raquo;</a>
+                </div>
+            </div>
+            <%
+        }
+        %>
+
+        <div class="row">
+            <div class="col">
+                <h2>Kontakty</h2>
+
+                <p><strong>vedoucí DK</strong>: Jméno Příjmení – <a href="mailto:vedouci@example.com?subject=D%C4%9Btsk%C3%BD%20koutek"><i class="fas fa-envelope"></i> vedouci@example.com</a><br>
+                    <strong>koordinátorka DK</strong>: Jméno Příjmení – <a href="mailto:koordinatorka@example.com?subject=D%C4%9Btsk%C3%BD%20koutek"><i class="fas fa-envelope"></i> koordinatorka@example.com</a></p>
+            </div>
+            <div class="col">
+                <h2>Provozní řád</h2>
+                <a class="btn btn-secondary" href="/files/provozni_rad_dk.pdf" role="button">Stáhnout &raquo;</a>
+            </div>
+        </div>
+        <hr>
+
+    </div>
+
+</main>
+
+<%- include ("templates/footer") %>

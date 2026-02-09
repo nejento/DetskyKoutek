@@ -1,0 +1,17 @@
+{
+  "port": 80,
+  "mysql_host": "localhost",
+  "mysql_user": "detskykoutek",
+  "mysql_pass": "pass",
+  "mysql_database": "detskykoutek",
+  "sessionSecret": "randomLongString",
+  "https": "false",
+  "httpsPort": 443,
+  "redirectToHttps": "true",
+  "privkey": "/etc/letsencrypt/live/my_api_url/privkey.pem",
+  "fullchain": "/etc/letsencrypt/live/my_api_url/fullchain.pem",
+  "mailFrom": "noreply@app.example.com",
+  "emailDomain": "example.com",
+  "appUrl": "https://app.example.com",
+  "ssoUrl": "https://auth.example.com/sso/login"
+}

@@ -1,0 +1,4 @@
+Contact: mailto:security@example.com
+Expires: Fri, 1 Oct 2021 13:00 +0200
+Preferred-Languages: en, cs
+Canonical: https://app.example.com/.well-known/security.txt

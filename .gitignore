@@ -1,0 +1,8 @@
+# Project exclude paths
+/node_modules/
+
+# package-lock.json becuase of issues with commits
+package-lock.json
+
+# Settings with set password
+settings.json

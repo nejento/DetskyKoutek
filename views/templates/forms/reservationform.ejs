@@ -1,0 +1,67 @@
+<%
+if (typeof reservation != 'undefined') { //Pokud není předložen seznam dětí, nepředvyplňujeme položky formu
+    %>
+    <h5 class="card-title"><%= rezervaceDate %>, <%= rezervaceStartTime %>—<%= rezervaceEndTime %></h5>
+    <p class="card-text"><span class="text-muted">Rodič: </span><%= reservation.parentName %> <%= reservation.parentSurname %> &bullet; <span class="text-muted">Kontakt na rodiče: </span><%= reservation.parentContact %></p>
+    <p class="card-text"><span class="text-muted">Poznámka rodiče: </span><%= reservation.childParentNote %></p>
+    <div class="form-group">
+        <label for="poznamkaStaff" class="form-label">Poznámka pro asistenty:</label>
+        <textarea name="poznamkaStaff" class="form-control" rows="2"><%= reservation.childStaffNote %></textarea>
+    </div>
+    <div class="form-group">
+        <label for="availableAssistants" class="form-label">Asistenti dostupní v daný čas:</label>
+        <select name="availableAssistants" class="form-control" <%= (reservation.selectedAssistant != null ? "value=" + reservation.selectedAssistant : "") %>>
+            <%
+            if (confirmed) {
+                %>
+                <option value="cancelConfirmation">Žádný asistent – Zrušit potvrzení</option>
+                <%
+            }
+            if (reservation.availableAssistants.absolute.length > 0) {
+            %>
+                <optgroup label="Asistenti s přesnou časovou shodou">
+                    <%
+                    for (let j = 0; j < reservation.availableAssistants.absolute.length; j++) {
+                        const asistent = reservation.availableAssistants.absolute[j];
+                    %>
+                    <option value="<%= asistent.user_id %>"><%= asistent.name %> <%= asistent.surname %></option>
+                    <%
+                    }
+                    %>
+                </optgroup>
+            <%
+            }
+            if (reservation.availableAssistants.sameDay.length > 0) {
+            %>
+                <optgroup label="Asistenti hlídající stejný den">
+                    <%
+                    for (let j = 0; j < reservation.availableAssistants.sameDay.length; j++) {
+                        const asistent = reservation.availableAssistants.sameDay[j];
+                    %>
+                    <option value="<%= asistent.user_id %>"><%= asistent.name %> <%= asistent.surname %></option>
+                    <%
+                    }
+                    %>
+                </optgroup>
+            <%
+            }
+            if (reservation.availableAssistants.other.length > 0) {
+            %>
+                <optgroup label="Asistenti bez časové shody">
+                    <%
+                    for (let j = 0; j < reservation.availableAssistants.other.length; j++) {
+                        const asistent = reservation.availableAssistants.other[j];
+                    %>
+                    <option value="<%= asistent.user_id %>"><%= asistent.name %> <%= asistent.surname %></option>
+                    <%
+                    }
+                    %>
+                </optgroup>
+            <%
+            }
+            %>
+        </select>
+    </div>
+    <%
+}
+%>

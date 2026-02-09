@@ -1,0 +1,475 @@
+<%- include ("templates/header") %>
+
+<%
+const hoursToText = (time) => {
+    if (time === 1) {
+        return time + " hodina";
+    } else if (time > 1 && time < 5 || time < 1 && time !== 0) {
+        return time + " hodiny";
+    } else return time + " hodin";
+},
+monthNames = ["leden", "únor", "březen", "duben", "květen", "červen", "červenec", "srpen", "září", "říjen", "listopad", "prosinec"];
+%>
+
+<main role="main">
+    <div class="jumbotron small-jumbotron">
+        <div class="container">
+            <h1 class="display-4 pb-4">Administrace</h1>
+            <!--<p><%= title %></p>-->
+            <div class="row">
+                <div class="container">
+                    <h2 class="pb-3 border-bottom">Provedené rezervace</h2>
+                    <form class="form-row">
+                        <div class="form-group col-md-2">
+                            <select id="yearSelector" name="year" class="form-control">
+                                <%
+                                if (typeof years != 'undefined' && years.length > 0) {
+                                    for (let i = 0; i < years.length; i++) {
+                                        let selected = (typeof year != 'undefined' && year === String(years[i]) ? "selected" : "");
+                                        %>
+                                        <option value="<%= years[i] %>" <%= selected %>><%= years[i] %></option>
+                                        <%
+                                    }
+                                }
+                                %>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <select id="monthSelector" name="month" class="form-control">
+                                <%
+                                if (typeof months != 'undefined' && months.length > 0) {
+                                    for (let i = 0; i < months.length; i++) {
+                                        let selected = (typeof month != 'undefined' && month === String(months[i]) ? "selected" : "");
+                                        %>
+                                        <option value="<%= months[i] %>" <%= selected %>><%= monthNames[months[i] - 1] %></option>
+                                        <%
+                                    }
+                                }
+                                %>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-3 d-flex align-items-end">
+                            <button id="getTables" class="btn btn-primary bg-fptul mr-1" type="submit">Vypsat</button>
+                            <%
+                            if (typeof year != 'undefined' && typeof month !== 'undefined' && year !== "" && month !== "") {
+                                %>
+                                <a id="exportCSV" class="btn btn-outline-primary" type="button" href="/admin/getcsv?year=<%= year %>&month=<%= month %>" download="<%= year %>_<%= month %>.csv">Export CSV</a>
+                                <%
+                            } else {
+                                %>
+                                <a id="exportCSV" class="btn btn-outline-primary" type="button" disabled>Export CSV</a>
+                                <%
+                            }
+                            %>
+
+                        </div>
+                    </form>
+                    <div class="accordion" id="reservationsTable">
+                        <div class="card">
+                            <div class="card-header" id="headingOne">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#tableParents" aria-expanded="true" aria-controls="tableParents">
+                                        Tabulka podle rodičů
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="tableParents" class="collapse show" aria-labelledby="headingOne" data-parent="#reservationsTable">
+                                <div class="card-body">
+                                    <%
+                                    if (typeof tables != 'undefined' && typeof tables.parentsTables != 'undefined' && Object.keys(tables.parentsTables).length > 0) {
+                                        const parents = Object.keys(tables.parentsTables);
+                                        for (let i = 0; i < parents.length; i++) {
+                                            const parent = tables.parentsTables[parents[i]],
+                                                odhlidanoCelkem = Math.round((parent.timeSum / 60) * 10) / 10;
+
+                                            %>
+                                            <div class="table-responsive">
+                                                <table class="table-sm table table-striped table-hover">
+                                                    <thead class="thead-dark">
+                                                        <tr>
+                                                            <th colspan="6" scope="col"><%= parent.parentName %><a href="mailto:<%= parent.parentLiane %>" class="float-right text-light"><%= parent.parentLiane %></a></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <thead class="thead-light">
+                                                        <tr>
+                                                            <th scope="col">Dítě</th>
+                                                            <th scope="col">Datum</th>
+                                                            <th scope="col">Od</th>
+                                                            <th scope="col">Do</th>
+                                                            <th scope="col">Asistent</th>
+                                                            <th scope="col">Doba hlídání</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <%
+                                                            for (let j = 0; j < parent.reservations.length; j++) {
+                                                                const reservation = parent.reservations[j];
+                                                                let rezervaceStart = new Date(reservation.timeFrom),
+                                                                    rezervaceEnd = new Date(reservation.timeTo),
+                                                                    options = { month: 'numeric', day: 'numeric', year: 'numeric'},
+                                                                    rezervaceDate = rezervaceStart.toLocaleDateString('cs-CZ', options),
+                                                                    rezervaceStartTime = rezervaceStart.getHours() + ":" + rezervaceStart.getMinutes() + (rezervaceStart.getMinutes() === 0 ? "0" : ""),
+                                                                    rezervaceEndTime = rezervaceEnd.getHours() + ":" + rezervaceEnd.getMinutes() + (rezervaceEnd.getMinutes() === 0 ? "0" : ""),
+                                                                    odhlidano = Math.round((rezervaceEnd - rezervaceStart) / (1000 * 60 * 60) * 10) / 10;
+                                                                %>
+                                                                <tr class="adminEditReservation" data-resid="<%= reservation.reservationID %>">
+                                                                    <td><%= reservation.childrenName %></td>
+                                                                    <td><%= rezervaceDate %></td>
+                                                                    <td><%= rezervaceStartTime %></td>
+                                                                    <td><%= rezervaceEndTime %></td>
+                                                                    <td><%= reservation.assistantName %></td>
+                                                                    <td><%= hoursToText(odhlidano) %></td>
+                                                                </tr>
+                                                                <%
+                                                            }
+                                                        %>
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td colspan="1"><strong>Celková cena</strong>:</td>
+                                                            <td colspan="3"><%= parent.startedHours * settings.price %> Kč</td>
+                                                            <td colspan="1"><strong>Celková doba:</strong></td>
+                                                            <td><%= hoursToText(odhlidanoCelkem) %></td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                            <%
+                                        }
+                                    }
+                                    %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="headingTwo">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#tableAssistants" aria-expanded="false" aria-controls="tableAssistants">
+                                        Tabulka podle asistentů
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="tableAssistants" class="collapse" aria-labelledby="headingTwo" data-parent="#reservationsTable">
+                                <div class="card-body">
+                                    <%
+                                    if (typeof tables != 'undefined' && typeof tables.assistantsTables != 'undefined' && Object.keys(tables.assistantsTables).length > 0) {
+                                        const assistants = Object.keys(tables.assistantsTables);
+                                        for (let i = 0; i < assistants.length; i++) {
+                                            const assistant = tables.assistantsTables[assistants[i]],
+                                                odhlidanoCelkem = Math.round((assistant.timeSum / 60) * 10) / 10;
+
+                                        %>
+                                        <div class="table-responsive">
+                                            <table class="table-sm table table-striped table-hover">
+                                                <thead class="thead-dark">
+                                                <tr>
+                                                    <th colspan="6" scope="col"><%= assistant.assistantName %><a href="mailto:<%= assistant.assistantLiane %>" class="float-right text-light"><%= assistant.assistantLiane %>cz</a></th>
+                                                </tr>
+                                                </thead>
+                                                <thead class="thead-light">
+                                                    <tr>
+                                                        <th scope="col">Dítě</th>
+                                                        <th scope="col">Datum</th>
+                                                        <th scope="col">Od</th>
+                                                        <th scope="col">Do</th>
+                                                        <th scope="col">Rodič</th>
+                                                        <th scope="col">Doba hlídání</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <%
+                                                    for (let j = 0; j < assistant.reservations.length; j++) {
+                                                        const reservation = assistant.reservations[j];
+                                                        let rezervaceStart = new Date(reservation.timeFrom),
+                                                            rezervaceEnd = new Date(reservation.timeTo),
+                                                            options = { month: 'numeric', day: 'numeric', year: 'numeric'},
+                                                            rezervaceDate = rezervaceStart.toLocaleDateString('cs-CZ', options),
+                                                            rezervaceStartTime = rezervaceStart.getHours() + ":" + rezervaceStart.getMinutes() + (rezervaceStart.getMinutes() === 0 ? "0" : ""),
+                                                            rezervaceEndTime = rezervaceEnd.getHours() + ":" + rezervaceEnd.getMinutes() + (rezervaceEnd.getMinutes() === 0 ? "0" : ""),
+                                                            odhlidano = Math.round((rezervaceEnd - rezervaceStart) / (1000 * 60 * 60) * 10) / 10;
+                                                    %>
+                                                    <tr class="adminEditReservation" data-resid="<%= reservation.reservationID %>">
+                                                        <td><%= reservation.childrenName %></td>
+                                                        <td><%= rezervaceDate %></td>
+                                                        <td><%= rezervaceStartTime %></td>
+                                                        <td><%= rezervaceEndTime %></td>
+                                                        <td><%= reservation.parentName %></td>
+                                                        <td><%= hoursToText(odhlidano) %></td>
+                                                    </tr>
+                                                    <%
+                                                    }
+                                                    %>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="1"><strong>Celková cena</strong>:</td>
+                                                        <td colspan="3"><%= assistant.startedHours * settings.price %> Kč</td>
+                                                        <td colspan="1"><strong>Celková doba:</strong></td>
+                                                        <td><%= hoursToText(odhlidanoCelkem) %></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                        <%
+                                        }
+                                    }
+                                    %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mb-4">
+        <h3 class="pb-3">Správa asistentů</h3>
+        <div id="no-success-userAdd" class="alert alert-danger" role="alert" style="display: none">
+            Nepovedlo se nastavit roli uživateli. Zkuste to prosím znovu.
+        </div>
+        <div id="no-valid-userAdd" class="alert alert-warning" role="alert" style="display: none">
+            Zadaná data nejsou platná. Zadejte platnou emailovou adresu a vyberte požadovanou roli uživatele
+        </div>
+        <form id="addUser" class="form-row">
+            <label for="email" class="col-2 col-form-label" data-toggle="popover" data-placement="top" data-html="true" data-content="Zadejte e-mailovou adresu, které bude role přidělena.</br><span class='text-muted'>Pokud uživatel nebyl zatím přihlášen, bude role přidělena po prvním přihlášení.</span>" data-trigger="hover">Nastavit uživateli roli <i class="fas fa-info-circle"></i></label>
+            <div class="input-group form-group col-6">
+                <input id="addUserEmail" placeholder="Email" type="text" name="email" pattern="^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*(?:(?:@<%= settings.emailDomain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') %>)|(?!.))" title="Zadejte platnou emailovou adresu" class="form-control" required>
+                <div class="input-group-append">
+                    <span class="input-group-text" id="basic-addon2">@<%= settings.emailDomain %></span>
+                </div>
+            </div>
+            <div class="form-group col d-flex align-items-end">
+                <select id="addUserRole" name="role" class="form-control">
+                    <option value="parent">Rodič</option>
+                    <option value="assistant">Asistent</option>
+                    <option value="admin">Administrátor</option>
+                </select>
+            </div>
+            <div class="form-group col d-flex align-items-end">
+                <button id="changeRole" class="btn btn-primary bg-fptul btn-block" type="submit">Nastavit roli</button>
+            </div>
+        </form>
+
+        <%
+        if (typeof assistants != 'undefined' && assistants.length > 0) {
+            %>
+            <div class="table-responsive">
+                <table class="table-sm table table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th colspan="6" scope="col">Asistenti</th>
+                        </tr>
+                    </thead>
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">Jméno</th>
+                            <th scope="col">Příjmení</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Kontakt</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <%
+                        for (let i = 0; i < assistants.length; i++) {
+                            let assistant = assistants[i];
+                            %>
+                            <tr>
+                                <%
+                                if (assistant.name == null) {
+                                    %>
+                                    <td colspan="2">Uživatel nebyl zatím přihlášen</td>
+                                    <%
+                                } else {
+                                    %>
+                                    <td><%= assistant.name %></td>
+                                    <td><%= assistant.surname %></td>
+                                    <%
+                                }
+                                %>
+                                <td><a href="mailto:<%= assistant.liane_ID %>"><%= assistant.liane_ID %></a></td>
+                                <%
+                                if (assistant.contact == null) {
+                                    %>
+                                        <td>Uživatel nemá nastavený kontakt</td>
+                                    <%
+                                } else {
+                                    %>
+                                        <td><%= assistant.contact %></td>
+                                    <%
+                                }
+                                %>
+                                <td><button type="button" data-assistantid='<%= assistant.id %>' data-assistantname='<%= assistant.name %>' data-assistantsurname='<%= assistant.surname %>' class="btn btn-outline-danger btn-sm float-right removeAssistantButton">Odebrat asistenta</button></td>
+                            </tr>
+                            <%
+                        }
+                        %>
+                    </tbody>
+                </table>
+            </div>
+            <%
+        }
+
+        if (typeof admins != 'undefined' && admins.length > 0) {
+        %>
+            <div class="table-responsive">
+                <table class="table-sm table table-striped table-hover">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th colspan="6" scope="col">Administrátoři</th>
+                    </tr>
+                    </thead>
+                    <thead class="thead-light">
+                    <tr>
+                        <th scope="col">Jméno</th>
+                        <th scope="col">Příjmení</th>
+                        <th scope="col">Email</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <%
+                    for (let i = 0; i < admins.length; i++) {
+                        let admin = admins[i];
+                    %>
+                    <tr>
+                        <%
+                        if (admin.name == null) {
+                        %>
+                            <td colspan="2">Uživatel nebyl zatím přihlášen</td>
+                        <%
+                        } else {
+                        %>
+                            <td><%= admin.name %></td>
+                            <td><%= admin.surname %></td>
+                        <%
+                        }
+                        %>
+                        <td><a href="mailto:<%= admin.liane_ID %>"><%= admin.liane_ID %></a></td>
+                    </tr>
+                    <%
+                    }
+                    %>
+                    </tbody>
+                </table>
+            </div>
+        <%
+        }
+        %>
+
+    </div>
+
+    <div class="container mb-3">
+        <h3 class="pb-3">Nastavení hodnot</h3>
+        <div class="accordion mb-3" id="accordionTexts">
+            <div class="card">
+                <div class="card-header" id="accordionTextsAlertHeading">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#accordionTextsAlert" aria-expanded="true" aria-controls="collapseOne">
+                            Velké varování <span class="text-muted float-right">Velké varování pod tlačítkem Vytvořit rezervaci na úvodní stránce</span>
+                        </button>
+                    </h2>
+                </div>
+
+                <div id="accordionTextsAlert" class="collapse" aria-labelledby="headingOne" data-parent="#accordionTexts">
+                    <div class="card-body">
+                        <form id="setAlertForm">
+                            <div class="form-group">
+                                <input id="alertHeader" class="form-control" type="text" placeholder="Nadpis varování" value="<%= settings.alert_header %>">
+                            </div>
+                            <div class="form-group">
+                                <textarea class="form-control" id="textAlert" rows="3"><%= settings.alert_text %></textarea>
+                            </div>
+                            <label class="form-label">Barva alertu:</label>
+                            <div class="form-group">
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input id="alertSuccess" type="radio" name="radioColor" value="success" class="custom-control-input" <%= (settings.alert_type === "success" ? "checked" : "") %>>
+                                    <label class="custom-control-label alert-success" for="alertSuccess">Zelená</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input id="alertDanger" type="radio" name="radioColor" value="danger" class="custom-control-input" <%= (settings.alert_type === "danger" ? "checked" : "") %>>
+                                    <label class="custom-control-label alert-danger" for="alertDanger">Červená</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input id="alertWarning" type="radio" name="radioColor" value="warning" class="custom-control-input" <%= (settings.alert_type === "warning" ? "checked" : "") %>>
+                                    <label class="custom-control-label alert-warning" for="alertWarning">Žlutá</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input id="alertInfo" type="radio" name="radioColor" value="info" class="custom-control-input" <%= (settings.alert_type === "info" ? "checked" : "") %>>
+                                    <label class="custom-control-label alert-info" for="alertInfo">Modrá</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input id="alertSecondary" type="radio" name="radioColor" value="secondary" class="custom-control-input" <%= (settings.alert_type === "secondary" ? "checked" : "") %>>
+                                    <label class="custom-control-label alert-secondary" for="alertSecondary">Šedá</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input id="alertDark" type="radio" name="radioColor" value="dark" class="custom-control-input" <%= (settings.alert_type === "dark" ? "checked" : "") %>>
+                                    <label class="custom-control-label alert-dark" for="alertDark">Tmavá</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="showSwitch" <%= (settings.alert_enable === "true" ? "checked" : "") %>>
+                                    <label class="custom-control-label" for="showSwitch">Zobrazit alert na hlavní stránce</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary bg-fptul">Uložit alert</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header" id="accordionTextsAktualniInformaceHeading">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#accordionTextsAktualniInformace" aria-expanded="false" aria-controls="collapseTwo">
+                            Aktuální informace <span class="text-muted float-right">Oddíl na úvodní stránce</span>
+                        </button>
+                    </h2>
+                </div>
+                <div id="accordionTextsAktualniInformace" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionTexts">
+                    <div class="card-body">
+                        <form id="setAktualniInformace">
+                            <div class="form-group">
+                                <textarea class="form-control" id="aktualniInformace" rows="3"><%= settings.current_info %></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary bg-fptul">Uložit aktuální informace</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="">Nastavení hodnot</h5>
+        <form id="setPrice" class="form-inline">
+            <label for="price" class="col-form-label" data-toggle="popover" data-placement="top" data-content="Cena pro zobrazení výpočtu cen za hlídání" data-trigger="hover">Cena za hodinu <i class="ml-1 fas fa-info-circle"></i></label>
+            <div class="input-group col-2">
+                <input id="priceInput" class="form-control" type="text" placeholder="Cena za hodinu" name="price" value="<%= settings.price %>" required>
+                <div class="input-group-append">
+                    <span class="input-group-text">Kč</span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary bg-fptul">Uložit cenu</button>
+        </form>
+    </div>
+
+    <!-- Confirm modal -->
+    <%- include ("templates/forms/confirmmodal", {modalTitle: "Zrušit rezervaci", modalDismiss: "Nerušit", modalConfirm: "Ano, zrušit"}) %>
+
+    <!-- Přidání a úprava času v kalendáři -->
+    <%- include ("templates/forms/editreservationform") %>
+
+    <!-- Toasty -->
+    <%- include ("templates/toasttemplate") %>
+
+</main>
+
+<script>
+    // Pass server settings to client-side JavaScript
+    const emailDomain = <%- JSON.stringify(settings.emailDomain) %>;
+</script>
+<script src="/scripts/admin.js"></script>
+
+<hr/>
+
+<%- include ("templates/footer") %>

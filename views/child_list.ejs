@@ -1,0 +1,138 @@
+<%- include ("templates/header") %>
+
+<%
+// Pokud není dodán parametr prvniRegistrace, předpokládáme, že nejde o první registraci
+if (typeof prvniRegistrace == 'undefined') {
+    prvniRegistrace = false;
+}
+
+// Pokud není dodán parametr vyzadovanKontakt, předpokládáme, že kontakt na rodiče je již uveden
+/*if (typeof(vyzadovanKontakt) == 'undefined') {
+    vyzadovanKontakt = false;
+}*/
+%>
+
+<main role="main">
+
+    <div class="jumbotron">
+        <div class="container">
+            <h1 class="display-3">Správa dětí</h1>
+            <p><%= title %></p>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <%
+        //Pokud jde o první registrované dítě, zobrazí se pouze tento form
+        if (prvniRegistrace) {
+            %>
+            <h4 class="mb-3">Zaregistrujte dítě na hlídání</h4>
+            <form id="addChildModal" class="needs-validation" novalidate>
+
+                <%- include ("templates/forms/childrenform") %>
+                <%- include ("templates/forms/phoneform") %>
+
+                <hr class="mb-4">
+                <button class="btn btn-primary btn-lg btn-block bg-fptul" type="submit">Zaregistrovat dítě</button>
+            </form>
+            <%
+        } else {
+            %>
+                <!-- List definovaných dětí -->
+                <h3 class="mb-3">Seznam dětí</h3>
+                <div class="mb-3 accordion" id="seznamdeti">
+                    <%
+                    for (let i = 0; i < deti.length; i++) {
+                        let dateDifference = new Date(new Date() - deti[i].birthdate),
+                            diteId = deti[i].id,
+                            diteVek = Math.abs(dateDifference.getUTCFullYear() - 1970),
+                            diteEditovatelne = (deti[i].editable == 1);
+                        %>
+                        <div class="card">
+                            <div class="card-header" id="heading_<%= diteId %>">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse_<%= diteId %>">
+                                        <%= deti[i].name %> <%= deti[i].surname %> <span class="text-muted">(<%= diteVek %>)</span>
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapse_<%= diteId %>" class="collapse" aria-labelledby="heading_<%= diteId %>" data-parent="#seznamdeti">
+                                <div class="card-body">
+                                    <form class="editChildren" data-childid="<%= diteId %>">
+                                        <%- include ("templates/forms/childrenform", {dite: deti[i]}) %>
+                                        <button type="submit" name="cardRemove" class="btn btn-primary bg-fptul">Upravit informace</button>
+                                        <% if (diteEditovatelne) {
+                                            %>
+                                                <button type="button" name="cardRemove" class="btn btn-outline-danger float-right removeChildren" data-childid="<%= diteId %>" data-childnme="<%= deti[i].name %>" data-childsurname="<%= deti[i].surname %>">Odstranit</button>
+                                            <%
+                                        }
+                                        %>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                        <%
+                    }
+                    %>
+                </div>
+
+                <!-- Přidání dalšího dítěte -->
+                <div class="mb-3">
+                    <button type="button" class="btn btn-primary bg-fptul" data-toggle="modal" data-target="#addChildModal">Přidat další dítě</button>
+                    <div id="addChildModal" class="modal fade bd-modal-xl" tabindex="-1" role="dialog" aria-labelledby="addChildModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-fptul">
+                                    <h5 class="modal-title text-white">Přidat další dítě</h5>
+                                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <form id="modal-form">
+                                    <div class="modal-body">
+                                        <%- include ("templates/forms/childrenform") %>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" name="modalSubmit" class="btn btn-primary">Zaregistrovat dítě</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Kontakt</h3>
+                <form id="changeContact">
+                    <%- include ("templates/forms/phoneform") %>
+                    <button type="submit" name="modalSubmit" class="btn btn-primary bg-fptul">Upravit kontakt</button>
+                </form>
+            <%
+        }
+        %>
+
+    <!-- Confirm modal -->
+    <%- include ("templates/forms/confirmmodal", {modalTitle: "Odstranit dítě ze seznamu", modalDismiss: "Zrušit", modalConfirm: "Ano, smazat"}) %>
+
+    </div>
+
+</main>
+
+<%
+//Pokud jde o první registrované dítě, zobrazí se jiný form. Pro něj je potřeba jiná adresa kvůli přidávanému telefonnímu číslu
+if (prvniRegistrace) {
+    %>
+        <script src="/scripts/childlistfirst.js"></script>
+    <%
+    } else {
+    %>
+        <script src="/scripts/childlist.js"></script>
+    <%
+    }
+%>
+
+<hr>
+
+<%- include ("templates/footer") %>

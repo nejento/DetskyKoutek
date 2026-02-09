@@ -1,0 +1,55 @@
+<div id="adminEditReservation" class="modal fade bd-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-fptul">
+                <h5 id="modalHeader" class="modal-title text-white">Změnit rezervaci</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="adminEdit-modal-form">
+                <div class="modal-body">
+                    <div id="no-success-adminEdit" class="alert alert-danger" role="alert" style="display: none">
+                        Nepovedlo se změnit informace rezervace. Zkuste to prosím znovu.
+                    </div>
+                    <div id="no-valid-adminEdit" class="alert alert-warning" role="alert" style="display: none">
+                        Zadaná data nejsou platná. Zadejte data v požadovaných formátech a zkuste to znovu.
+                    </div>
+                    <div class="form-group">
+                        <label for="jmeno" class="col-form-label">Datum a čas rezervace</label>
+                        <div class="input-group date mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="far fa-calendar"></i></span>
+                            </div>
+                            <input type="text" id="adminEditDate" class="form-control" aria-label="Datum volného času" placeholder="dd. mm. rrrr" pattern="(\d{1,2})[.\s]*(\d{1,2})[.\s]*(\d{4})" title="Datum musí být uvedeno ve formátu dd. mm. rrrr (např. 23. 5. 2021)" value="" required />
+                            <div class="invalid-feedback">
+                                Datum je vyžadováno
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Od</span>
+                            </div>
+                            <input id="adminEditTimeFrom" type="time" aria-label="Od" placeholder="7:00" class="form-control" pattern="([01]?[0-9]|2[0-3])[:.,]([0-5][0-9])" title="Čas začátku musí být ve formátu hh:mm (např. 8:00)" value="" required />
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Do</span>
+                            </div>
+                            <input id="adminEditTimeTo" type="time" aria-label="Do" placeholder="18:00" class="form-control" pattern="([01]?[0-9]|2[0-3])[:.,]([0-5][0-9])" title="Čas konce musí být ve formátu hh:mm (např. 15:00)" value="" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="availableAssistants" class="form-label">Asistenti dostupní v daný čas:</label>
+                        <select id="adminEditAvailableAssistants" name="availableAssistants" class="form-control">
+                            <option value="cancelConfirmation">Žádný asistent – Zrušit potvrzení</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary bg-fptul mr-auto">Změnit rezervaci</button>
+                    <button type="button" id="adminEditRemoveButton" class="btn btn-outline-danger">Odstranit rezervaci</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="/scripts/editreservationform.js"></script>

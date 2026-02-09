@@ -1,0 +1,185 @@
+<%- include ("templates/header") %>
+
+<main role="main">
+    <div class="jumbotron small-jumbotron">
+        <div class="container">
+            <h1 class="display-4 pb-4">Správa rezervací</h1>
+            <!--<p><%= title %></p>-->
+            <div class="row">
+                <div class="container">
+                    <h2 class="pb-3 border-bottom">Nepotvrzené rezervace</h2>
+
+                    <div class="accordion" id="unconfirmedReservations">
+                        <%
+                        if (typeof reservations != 'undefined' && reservations.length > 0) {
+                            for (let i = 0; i < reservations.length; i++) {
+                                const reservation = reservations[i];
+                                let dateDifference = new Date(new Date() - new Date(reservation.childBirthdate)),
+                                    diteVek = Math.abs(dateDifference.getUTCFullYear() - 1970),
+                                    rezervaceStart = new Date(reservation.reservationStart),
+                                    rezervaceEnd = new Date(reservation.reservationEnd),
+                                    options = { weekday: 'long', month: 'long', day: 'numeric' },
+                                    rezervaceDate = rezervaceStart.toLocaleDateString('cs-CZ', options),
+                                    rezervaceStartTime = rezervaceStart.getHours() + ":" + rezervaceStart.getMinutes() + (rezervaceStart.getMinutes() === 0 ? "0" : ""),
+                                    rezervaceEndTime = rezervaceEnd.getHours() + ":" + rezervaceEnd.getMinutes() + (rezervaceEnd.getMinutes() === 0 ? "0" : "");
+                                %>
+                                <div id="reservationCard_<%= reservation.reservationID %>" class="card">
+                                    <div class="card-header">
+                                        <h2 class="mb-0">
+                                            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#reservation_<%= reservation.reservationID %>" aria-expanded="true" aria-controls="collapse">
+                                                <%= reservation.childName %> <%= reservation.childSurname %> <span class="text-muted">(<%= diteVek %>)</span><span class="float-right"><%= rezervaceDate %>, <%= rezervaceStartTime %>—<%= rezervaceEndTime %></span>
+                                            </button>
+                                        </h2>
+                                    </div>
+                                    <div id="reservation_<%= reservation.reservationID %>" class="collapse <%= (i === 0 ? "show" : "") %>" data-parent="#unconfirmedReservations">
+                                        <div class="card-body">
+                                            <div data-warning="no-success" class="alert alert-danger" role="alert" style="display: none">
+                                                Nepovedlo se uložit potvrzení rezervace. Zkuste to prosím znovu.
+                                            </div>
+                                            <div data-warning="no-valid" class="alert alert-warning" role="alert" style="display: none">
+                                                Zadaná data nejsou platná. Zkontrolujte, zdali je vybraný správný asistent, nebo není poznámka ve špatném formátu.
+                                            </div>
+                                            <form class="acceptReservation" data-resid="<%= reservation.reservationID %>">
+                                                <%- include ("templates/forms/reservationform", {reservation: reservation, rezervaceStart: rezervaceStart, rezervaceEnd: rezervaceEnd, rezervaceDate: rezervaceDate, rezervaceStartTime: rezervaceStartTime, rezervaceEndTime: rezervaceEndTime, confirmed: false}) %>
+                                                <div class="form-group">
+                                                    <button type="input" class="btn btn-primary bg-fptul">Potvrdit rezervaci</button>
+                                                    <button type="button" class="btn btn-outline-primary adminEditReservation" data-resid="<%= reservation.reservationID %>">Změnit čas rezervace</button>
+                                                    <button type="button" name="reservationRemove" class="btn btn-outline-danger float-right removeReservation" data-resid="<%= reservation.reservationID %>" data-childname="<%= reservation.childName %>" data-childsurname="<%= reservation.childSurname %>">Odstranit rezervaci</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <%
+                            }
+                        } else {
+                            %>
+                            <div class="alert alert-secondary" role="alert">
+                                Nejsou žádné čekající nepřiřazené rezervace.
+                            </div>
+                            <%
+                        }
+                        %>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mb-3">
+        <h3 class="pb-3">Potvrzené rezervace</h3>
+        <div class="accordion" id="confirmedReservationsMain">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseMain">
+                            Seznam potvrzených rezervací
+                        </button>
+                    </h2>
+                </div>
+                <div id="collapseMain" class="collapse" data-parent="#confirmedReservationsMain">
+                    <div class="card-body">
+
+                        <%
+                        if (typeof confirmedReservations != 'undefined' && confirmedReservations.length > 0) {
+                            %>
+                            <div class="accordion" id="confirmedReservations">
+                                <%
+                                for (let i = 0; i < confirmedReservations.length; i++) {
+                                    const reservation = confirmedReservations[i];
+                                    let dateDifference = new Date(new Date() - new Date(reservation.childBirthdate)),
+                                        diteVek = Math.abs(dateDifference.getUTCFullYear() - 1970),
+                                        rezervaceStart = new Date(reservation.reservationStart),
+                                        rezervaceEnd = new Date(reservation.reservationEnd),
+                                        options = { weekday: 'long', month: 'long', day: 'numeric' },
+                                        rezervaceDate = rezervaceStart.toLocaleDateString('cs-CZ', options),
+                                        rezervaceStartTime = rezervaceStart.getHours() + ":" + rezervaceStart.getMinutes() + (rezervaceStart.getMinutes() === 0 ? "0" : ""),
+                                        rezervaceEndTime = rezervaceEnd.getHours() + ":" + rezervaceEnd.getMinutes() + (rezervaceEnd.getMinutes() === 0 ? "0" : "");
+                                    %>
+                                    <div id="confirmedReservationCard_<%= reservation.reservationID %>" class="card">
+                                        <div class="card-header">
+                                            <h2 class="mb-0">
+                                                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#confirmedReservation_<%= reservation.reservationID %>" aria-expanded="true" aria-controls="collapse">
+                                                    <%= reservation.childName %> <%= reservation.childSurname %> <span class="text-muted">(<%= diteVek %>)</span><span class="float-right"><%= rezervaceDate %>, <%= rezervaceStartTime %>—<%= rezervaceEndTime %></span>
+                                                </button>
+                                            </h2>
+                                        </div>
+                                        <div id="confirmedReservation_<%= reservation.reservationID %>" class="collapse" data-parent="#confirmedReservations">
+                                            <div class="card-body">
+                                                <div data-warning="no-success" class="alert alert-danger" role="alert" style="display: none">
+                                                    Nepovedlo se uložit potvrzení rezervace. Zkuste to prosím znovu.
+                                                </div>
+                                                <div data-warning="no-valid" class="alert alert-warning" role="alert" style="display: none">
+                                                    Zadaná data nejsou platná. Zkontrolujte, zdali je vybraný správný asistent, nebo není poznámka ve špatném formátu.
+                                                </div>
+                                                <form class="updateReservation" data-resid="<%= reservation.reservationID %>">
+                                                    <%- include ("templates/forms/reservationform", {reservation: reservation, rezervaceStart: rezervaceStart, rezervaceEnd: rezervaceEnd, rezervaceDate: rezervaceDate, rezervaceStartTime: rezervaceStartTime, rezervaceEndTime: rezervaceEndTime, confirmed: true}) %>
+                                                    <div class="form-group">
+                                                        <button type="input" class="btn btn-primary bg-fptul">Upravit rezervaci</button>
+                                                        <button type="button" class="btn btn-outline-primary adminEditReservation" data-resid="<%= reservation.reservationID %>">Změnit čas rezervace</button>
+                                                        <button type="button" name="reservationRemove" class="btn btn-outline-danger float-right removeReservation" data-resid="<%= reservation.reservationID %>" data-childname="<%= reservation.childName %>" data-childsurname="<%= reservation.childSurname %>">Odstranit rezervaci</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <%
+                                }
+                                %>
+                            </div>
+                            <%
+                        } else {
+                            %>
+                            <div class="alert alert-secondary" role="alert">
+                                Nejsou žádné budoucí potvrzené rezervace
+                            </div>
+                            <%
+                        }
+                        %>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%
+    if (typeof(assistants) != 'undefined' && assistants.length > 0) {
+
+        %>
+        <div class="container">
+            <h3 class="pb-3 border-bottom">Rozvrhy asistentů</h3>
+            <select id="calendarSelector" class="form-control form-control-lg mb-3">
+            <%
+                for (let i = 0; i < assistants.length; i++) {
+                    let assistant = assistants[i];
+                    %>
+                    <option value="<%= assistant.id %>"><%= assistant.name %> <%= assistant.surname %></option>
+                    <%
+                }
+            %>
+            </select>
+            <div id='calendar'></div>
+        </div>
+        <%
+
+    }
+    %>
+
+    <!-- Confirm modal -->
+    <%- include ("templates/forms/confirmmodal", {modalTitle: "Zrušit rezervaci", modalDismiss: "Nerušit", modalConfirm: "Ano, zrušit"}) %>
+
+    <!-- Přidání a úprava času v kalendáři -->
+    <%- include ("templates/forms/editreservationform") %>
+
+    <!-- Toasty -->
+    <%- include ("templates/toasttemplate") %>
+
+</main>
+
+<script src="/scripts/manage.js"></script>
+
+<hr/>
+
+<%- include ("templates/footer") %>

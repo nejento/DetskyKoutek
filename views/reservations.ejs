@@ -1,0 +1,160 @@
+<%- include ("templates/header") %>
+
+<main role="main">
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron small-jumbotron">
+        <div class="container">
+            <h1 class="display-4 pb-4">Správa rezervací</h1>
+
+            <div class="row">
+                <div class="container">
+                    <h2 class="pb-3 border-bottom">Vytvořit novou rezervaci</h2>
+                    <form id="addReservation">
+                        <div id="no-success" class="alert alert-danger" role="alert" style="display: none">
+                            Nepovedlo se přidat čas do kalendáře. Zkuste to prosím znovu.
+                        </div>
+                        <div id="no-valid" class="alert alert-warning" role="alert" style="display: none">
+                            Zadaná data nejsou platná. Zadejte data v požadovaných formátech a zkuste to znovu.
+                        </div>
+
+                        <label for="child" class="col-form-label">Rezervace pro:</label>
+                        <select id="childSelector" name="child" class="form-control form-control-lg">
+                            <%
+                            for (let i = 0; i < deti.length; i++) {
+                                let dateDifference = new Date(new Date() - deti[i].birthdate),
+                                    diteVek = Math.abs(dateDifference.getUTCFullYear() - 1970);
+                                %>
+                                <option value="<%= deti[i].id %>"><%= deti[i].name %> <%= deti[i].surname %> <span class="text-muted">(<%= diteVek %>)</span></option>
+                                <%
+                            }
+                            %>
+                        </select>
+
+                        <label for="jmeno" class="col-form-label">Datum a čas dostupnosti v koutku</label>
+                        <div class="input-group date mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="far fa-calendar"></i></span>
+                            </div>
+                            <input type="text" id="date" class="form-control" aria-label="Datum volného času" placeholder="dd. mm. rrrr" pattern="(\d{1,2})[.\s]*(\d{1,2})[.\s]*(\d{4})" title="Datum musí být uvedeno ve formátu dd. mm. rrrr (např. 23. 5. 2021)" value="" required />
+                            <div class="invalid-feedback">
+                                Datum je vyžadováno
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Od</span>
+                            </div>
+                            <input type="time" aria-label="Od" id="timeFrom" placeholder="7:00" class="form-control" pattern="([01]?[0-9]|2[0-3])[:.,]([0-5][0-9])" title="Čas začátku musí být ve formátu hh:mm (např. 8:00)" value="" required />
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Do</span>
+                            </div>
+                            <input type="time" aria-label="Do" id="timeTo" placeholder="18:00" class="form-control" pattern="([01]?[0-9]|2[0-3])[:.,]([0-5][0-9])" title="Čas konce musí být ve formátu hh:mm (např. 15:00)" value="" required />
+                        </div>
+                        <hr class="mb-4">
+                        <button class="btn btn-primary btn-lg btn-block bg-fptul" type="submit">Vytvořit rezervaci</button>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Seznam rezervací -->
+    <div class="container">
+        <h3 class="mb-3">Seznam vytvořených rezervací</h3>
+
+        <div id="no-success-remove" class="alert alert-danger" role="alert" style="display: none">
+            Nepovedlo se odstranit rezervaci. Zkuste to prosím znovu.
+        </div>
+        <div id="no-valid-remove" class="alert alert-warning" role="alert" style="display: none">
+            Zadaná data nejsou platná. Zadejte data v požadovaných formátech a zkuste to znovu.
+        </div>
+        <%
+        if (typeof(rezervace) != 'undefined' && rezervace.length > 0) { //Rezervace existují
+            %>
+            <div class="list-group">
+            <%
+
+            // Vypsat jednotlivé rezervace
+            for (let i = 0; i < rezervace.length; i++) {
+                let dite = deti[deti.findIndex(d => d.id === rezervace[i].child_id)];
+                    dateDifference = new Date(new Date() - dite.birthdate),
+                    diteVek = Math.abs(dateDifference.getUTCFullYear() - 1970),
+                    rezervaceStart = new Date(rezervace[i].time_from),
+                    rezervaceEnd = new Date(rezervace[i].time_to),
+                    options = { weekday: 'long', month: 'long', day: 'numeric' },
+                    rezervaceDate = rezervaceStart.toLocaleDateString('cs-CZ', options),
+                    rezervaceStartTime = rezervaceStart.getHours() + ":" + rezervaceStart.getMinutes() + (rezervaceStart.getMinutes() === 0 ? "0" : ""),
+                    rezervaceEndTime = rezervaceEnd.getHours() + ":" + rezervaceEnd.getMinutes() + (rezervaceEnd.getMinutes() === 0 ? "0" : ""),
+                    rezervaceAsistent = rezervace[i].user_id;
+
+                if (rezervaceAsistent == null) { //Pokud k rezervaci není přidělen asistent, zobrazit rezervaci jako nepotvrzenou
+
+                    %>
+                    <div id="reservation_<%= rezervace[i].id %>" class="list-group-item list-group-item-action bg-light">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1"><%= dite.name %> <%= dite.surname %> <span class="text-muted">(<%= diteVek %>)</span></h5>
+                            <small>Rezervace zatím nebyla potvrzena</small>
+                        </div>
+                        <p class="mb-1"><%= rezervaceDate %>, <%= rezervaceStartTime %>&mdash;<%= rezervaceEndTime %></p>
+
+                        <%
+                        if (rezervace[i].removable) { //Pokud je rezervace odstranitelná, zobrazit odstraňovací tlačítko (rezervace je až další den nebo není zatím potvrzená)
+                            %>
+                            <button name="cardRemove" class="btn btn-outline-danger removeReservation" data-resid="<%= rezervace[i].id %>">Zrušit rezervaci</button>
+                            <%
+                        }
+                        %>
+                    </div>
+                    <%
+
+                } else { //Pokud je k rezervaci přidělen asistent, zobrazit jako potvrzenou
+
+                    %>
+                    <div id="reservation_<%= rezervace[i].id %>" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1"><%= dite.name %> <%= dite.surname %> <span class="text-muted">(<%= diteVek %>)</span></h5>
+                            <small>Rezervace byla potvrzena</small>
+                        </div>
+                        <p class="mb-1"><%= rezervaceDate %>, <%= rezervaceStartTime %>&mdash;<%= rezervaceEndTime %></p>
+                        <p><span class="text-muted">Asistent: </span><%= rezervace[i].name %> <%= rezervace[i].surname %></p>
+
+                        <%
+                        if (rezervace[i].removable) { //Pokud je rezervace odstranitelná, zobrazit odstraňovací tlačítko (rezervace je až další den nebo není zatím potvrzená)
+                        %>
+                            <button name="cardRemove" class="btn btn-outline-danger removeReservation" data-resid="<%= rezervace[i].id %>">Zrušit rezervaci</button>
+                        <%
+                        }
+                        %>
+                    </div>
+                    <%
+                }
+            }
+            %>
+            </div>
+            <%
+
+        } else { //Žádné rezervace nejsou vytvořeny
+            %>
+            <div class="alert alert-secondary" role="alert">
+                Nejsou naplánované žádné rezervace. Seznam proběhlých rezervací za minulé měsíce můžete najít na stránce Přehled.
+            </div>
+            <%
+        }
+        %>
+
+    </div>
+
+    <!-- Confirm modal -->
+    <%- include ("templates/forms/confirmmodal", {modalTitle: "Zrušit rezervaci", modalDismiss: "Nerušit", modalConfirm: "Ano, zrušit"}) %>
+
+</main>
+
+<script src="/scripts/reservations.js"></script>
+
+<hr>
+
+<%- include ("templates/footer") %>

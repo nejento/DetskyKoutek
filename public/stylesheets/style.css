@@ -1,0 +1,91 @@
+/* Definice globálních proměnných */
+:root {
+    --fpblue: rgb(0, 106, 179); /* Barva FP TUL */
+}
+
+/* Vlastní barva pro BG prvků */
+.bg-fptul {
+    background-color: var(--fpblue);
+}
+
+body {
+    padding-top: 3.5rem;
+}
+
+.bd-placeholder-img {
+    font-size: 1.125rem;
+    text-anchor: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+@media (min-width: 768px) {
+    .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+    }
+}
+
+/* Footer */
+.address {
+    padding-left: 80px;
+    background: url('/images/tul-ico.png') 0 5px no-repeat;
+    min-height: 70px;
+    font-size: small;
+    overflow-wrap: break-spaces;
+}
+
+/* Kompaktnější Jumbotron */
+.small-jumbotron {
+    padding: 2rem 1rem;
+}
+
+.modal:nth-of-type(even) {
+    z-index: 1052 !important;
+}
+.modal-backdrop.show:nth-of-type(even) {
+    z-index: 1051 !important;
+}
+
+.jumbotron-background {
+    background-size: cover;
+    background-position: center;
+    padding: unset;
+}
+
+.jumbotron-background .container {
+    /*max-width: 1140px;*/
+    background-color: #fbfbfba6;
+    padding-top: 2rem;
+    padding-bottom: 1rem;
+}
+
+@media only screen and (min-width: 576px) {
+    .jumbotron-background .container {
+        max-width: 600px;
+        padding: 1rem 3em;
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    .jumbotron-background .container {
+        max-width: 760px;
+        padding: 2em 2em 1em;
+    }
+}
+
+@media only screen and (min-width: 992px) {
+    .jumbotron-background .container {
+        max-width: 1030px;
+        padding: 2em 3em 1em;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    .jumbotron-background .container {
+        max-width: 1240px;
+        padding: 3rem 4rem;
+    }
+}
+

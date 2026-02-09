@@ -1,0 +1,21 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: weekly
+    time: "04:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: debug
+    versions:
+    - 4.3.1
+  - dependency-name: bootstrap
+    versions:
+    - 4.6.0
+  - dependency-name: jquery
+    versions:
+    - 3.6.0
+  - dependency-name: ejs
+    versions:
+    - 3.1.6
